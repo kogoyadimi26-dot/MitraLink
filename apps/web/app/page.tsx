@@ -9,8 +9,8 @@ export default function Home() {
       <ul>
         <li><Link href="/admin">Admin</Link></li>
         <li><Link href="/distributor">Distributor</Link></li>
+        <li><Link href="/masuk">Masuk</Link></li>
       </ul>
-      <p style={ui.muted}>Masuk belum tersedia. Menunggu keputusan penyedia SMS (D-001).</p>
     </section>
   );
 }

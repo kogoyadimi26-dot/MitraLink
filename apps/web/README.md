@@ -1,6 +1,6 @@
 # MitraLink web dashboard
 
-Next.js (App Router, TypeScript). Used by distributors and the admin team. Admin and distributor screens are built; sign-in is not.
+Next.js (App Router, TypeScript). Used by distributors and the admin team. Admin and distributor screens are built, with phone sign-in at /masuk.
 
 ## Run locally
 
@@ -24,7 +24,9 @@ Distributor (`/distributor`):
 
 Every page sits behind `RoleGate`, which only decides what to show. The database enforces the rules.
 
-Sign-in is not built yet. Phone sign-in waits for the SMS provider decision (D-001), so each page says that sign-in is needed until it exists.
+Sign-in is at `/masuk`: a phone number, then a one-time code by SMS. The session is kept in the browser. Each page checks that the signed-in user has the right role and an active profile. Sign-in needs the phone provider turned on in the Supabase project (decision D-001).
+
+A new user has no profile until one is created with register_buyer or register_distributor, so after the first sign-in they see "no access" until registration exists.
 
 ## Checks
 

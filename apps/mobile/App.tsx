@@ -1,5 +1,8 @@
-import { useState } from 'react';
-import { SafeAreaView, StyleSheet, Text, View, Pressable } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, SafeAreaView, StyleSheet, Text, View, Pressable } from 'react-native';
+import { getSupabase } from './lib/supabase';
+import { signOut } from './lib/session';
+import SignIn from './screens/SignIn';
 import Catalogue from './screens/Catalogue';
 import Basket from './screens/Basket';
 import Orders from './screens/Orders';
@@ -18,6 +21,43 @@ export default function App() {
   const [cart, setCart] = useState<CartItem[]>([]);
   // Bumped after an order changes, so the order list reloads.
   const [refreshKey, setRefreshKey] = useState(0);
+  // null = checking, false = signed out, true = signed in.
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [configured] = useState(() => getSupabase() !== null);
+
+  useEffect(() => {
+    const supabase = getSupabase();
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => setSignedIn(!!session));
+    return () => data.subscription.unsubscribe();
+  }, []);
+
+  if (!configured) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.page}>
+          <Text style={styles.error}>Konfigurasi Supabase belum diisi (lihat .env.example).</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  if (signedIn === null) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.page}>
+          <ActivityIndicator />
+        </View>
+      </SafeAreaView>
+    );
+  }
+  if (!signedIn) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <SignIn onSignedIn={() => setSignedIn(true)} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -25,6 +65,11 @@ export default function App() {
         <Home
           onCatalogue={() => setScreen({ name: 'catalogue' })}
           onOrders={() => setScreen({ name: 'orders' })}
+          onSignOut={async () => {
+            await signOut();
+            setCart([]);
+            setScreen({ name: 'home' });
+          }}
         />
       ) : null}
       {screen.name === 'catalogue' ? (
@@ -65,7 +110,7 @@ export default function App() {
   );
 }
 
-function Home({ onCatalogue, onOrders }: { onCatalogue: () => void; onOrders: () => void }) {
+function Home({ onCatalogue, onOrders, onSignOut }: { onCatalogue: () => void; onOrders: () => void; onSignOut: () => void }) {
   return (
     <View style={styles.page}>
       <Text style={styles.title}>MitraLink</Text>
@@ -76,7 +121,9 @@ function Home({ onCatalogue, onOrders }: { onCatalogue: () => void; onOrders: ()
       <Pressable style={styles.buttonOutline} onPress={onOrders}>
         <Text style={styles.buttonOutlineText}>Pesanan saya</Text>
       </Pressable>
-      <Text style={styles.note}>Masuk belum tersedia. Menunggu keputusan penyedia SMS (D-001).</Text>
+      <Pressable onPress={onSignOut}>
+        <Text style={styles.link}>Keluar</Text>
+      </Pressable>
     </View>
   );
 }
@@ -87,6 +134,8 @@ const styles = StyleSheet.create({
   title: { fontSize: 26, fontWeight: '700', color: '#1d2623' },
   body: { fontSize: 16, color: '#1d2623' },
   note: { fontSize: 13, color: '#5d6661' },
+  error: { fontSize: 15, color: '#9b3d2e' },
+  link: { fontSize: 16, color: '#2c6b4f', textAlign: 'center' },
   button: { backgroundColor: '#2c6b4f', padding: 14, borderRadius: 10, alignItems: 'center' },
   buttonText: { color: '#ffffff', fontSize: 17, fontWeight: '600' },
   buttonOutline: { borderWidth: 1, borderColor: '#2c6b4f', padding: 14, borderRadius: 10, alignItems: 'center' },

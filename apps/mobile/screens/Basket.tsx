@@ -37,7 +37,7 @@ export default function Basket({ cart, onChange, onOrdersPlaced, onBack }: Props
       return;
     }
     if (!buyerId) {
-      setMessage('Masuk diperlukan untuk mengirim pesanan. Masuk belum tersedia (menunggu D-001).');
+      setMessage('Masuk diperlukan untuk mengirim pesanan.');
       return;
     }
     setBusy(group.distributorId);

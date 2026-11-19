@@ -9,7 +9,7 @@ type Status = 'checking' | 'ok' | 'signin' | 'wrongrole' | 'unconfigured';
 
 /**
  * Shows its children only to a signed-in, active user with the given role. Access is still enforced
- * by the database: this only decides what to show. Sign-in is not built yet (waits for D-001).
+ * by the database: this only decides what to show.
  */
 export default function RoleGate({ role, children }: { role: Role; children: ReactNode }) {
   const [status, setStatus] = useState<Status>('checking');
@@ -39,7 +39,11 @@ export default function RoleGate({ role, children }: { role: Role; children: Rea
   if (status === 'checking') return <p style={ui.muted}>Memuat...</p>;
   if (status === 'unconfigured') return <p style={ui.error}>Konfigurasi Supabase belum diisi (lihat .env.example).</p>;
   if (status === 'signin') {
-    return <p style={ui.error}>Masuk diperlukan. Masuk belum tersedia (menunggu keputusan penyedia SMS, D-001).</p>;
+    return (
+      <p style={ui.error}>
+        Masuk diperlukan. <a href="/masuk">Masuk dengan nomor HP</a>.
+      </p>
+    );
   }
   if (status === 'wrongrole') {
     return <p style={ui.error}>Akun ini tidak punya akses ke halaman ini.</p>;
