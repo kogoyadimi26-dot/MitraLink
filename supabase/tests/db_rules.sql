@@ -103,21 +103,18 @@ begin
     (select code = 'PDC-J-0001' from public.orders where id = order1), (select code from public.orders where id = order1));
 
   -- Transitions and actor rules
-  perform pg_temp.as_user(dist1);
-  res := public.transition_order(order1, 'Accepted');
-  insert into pg_temp.test_results values ('distributor accepts order', res->>'state' = 'Accepted', res::text);
-
   perform pg_temp.as_user(buyer1);
   begin
-    perform public.transition_order(order1, 'AwaitingPayment');
-    insert into pg_temp.test_results values ('buyer cannot move Accepted to AwaitingPayment', false, 'accepted');
+    perform public.transition_order(order1, 'Accepted');
+    insert into pg_temp.test_results values ('buyer cannot accept an order', false, 'accepted');
   exception when others then
-    insert into pg_temp.test_results values ('buyer cannot move Accepted to AwaitingPayment', true, sqlerrm);
+    insert into pg_temp.test_results values ('buyer cannot accept an order', true, sqlerrm);
   end;
 
-  perform pg_temp.as_user(null);
-  res := public.transition_order(order1, 'AwaitingPayment');
-  insert into pg_temp.test_results values ('system moves order to AwaitingPayment', res->>'state' = 'AwaitingPayment', res::text);
+  perform pg_temp.as_user(dist1);
+  res := public.transition_order(order1, 'Accepted');
+  insert into pg_temp.test_results values ('distributor accepts; order moves on to AwaitingPayment',
+    res->>'state' = 'AwaitingPayment', res::text);
 
   perform pg_temp.as_user(dist1);
   begin
@@ -213,8 +210,6 @@ begin
   order2 := (res->>'order_id')::uuid;
   perform pg_temp.as_user(dist1);
   perform public.transition_order(order2, 'Accepted');
-  perform pg_temp.as_user(null);
-  perform public.transition_order(order2, 'AwaitingPayment');
   perform pg_temp.as_user(dist1);
   perform public.transition_order(order2, 'Paid', null, 'PDC-J-0002');
   perform public.transition_order(order2, 'Shipped');

@@ -50,6 +50,13 @@ Placed ──accept──▶ Accepted ──request payment──▶ AwaitingPay
 
 Every transition writes an event (who, when, device, previous state, new state). Commission is calculated when an order reaches Confirmed.
 
+**Phase 4 changes (implemented in `supabase/migrations/20261119000007_phase4_ordering.sql`; founder to confirm):**
+
+1. Accepted moves on to AwaitingPayment automatically in the same call, recorded as a system event. The distributor does not make a second call.
+2. Admin may reverse a payment: Paid returns to AwaitingPayment with a reason (FR-12). Not possible once the order has shipped.
+3. Declined and Cancelled require a reason, which is stored on the order.
+4. Every order event queues notifications for the people involved, both in-app and SMS (FR-24). SMS messages stay queued until the SMS provider is chosen (D-001).
+
 ## 4. Functional requirements
 
 Each requirement lists its priority (MVP or Phase 2), the business rules it implements, and acceptance criteria.

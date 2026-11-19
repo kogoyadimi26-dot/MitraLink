@@ -14,6 +14,7 @@ Applied in order. Each file is the final state for its area.
 | `migrations/20261119000004_business_functions.sql` | `place_order`, `transition_order`, commission, order codes, restricted-goods guard, config audit |
 | `migrations/20261119000005_phase2_onboarding.sql` | Phase 2: `register_buyer`, `create_agent`, `register_distributor`, `approve_distributor`, `reject_distributor`; distributor documents (storage paths only); rejection reason |
 | `migrations/20261119000006_phase3_catalogue.sql` | Phase 3: `add_product`, `update_product`, `set_product_availability`, `admin_hide_product`, `admin_unhide_product`, `browse_catalogue`; photo limit 300 KB; products writable only through functions |
+| `migrations/20261119000007_phase4_ordering.sql` | Phase 4: automatic AwaitingPayment after accept; admin payment reversal; decline and cancel reasons; notification queue (trigger on order events); payment instructions; payment proof photos; dispute photos (max 3) |
 
 Two fixes were found by testing and the security advisor and applied as separate migrations in the project. They are already included in files 003 and 004 here:
 
@@ -33,6 +34,10 @@ Last run: 32 of 32 checks passed.
 `tests/phase2_onboarding.sql` covers registration (buyer, agent, distributor), the agent town rule, duplicate phone numbers, terms acceptance, distributor approval and rejection, and who can see distributors and their documents. Last run: 22 of 22 checks passed.
 
 `tests/phase3_catalogue.sql` covers adding and changing products, the restricted-goods rule, the 300 KB photo limit and photo folder, browsing by town, admin hide and unhide, and ordering a hidden product. Last run: 22 of 22 checks passed.
+
+`tests/phase4_ordering.sql` covers decline with reason, automatic AwaitingPayment after accept, payment instructions shown only to the buyer and only while payment is due, proof photos (folder and size), paid and shipped, payment reversal (not after shipping), cancellation with reason, dispute photos (max 3), and notification visibility. Last run: 23 of 23 checks passed.
+
+The Phase 1 test (`tests/db_rules.sql`) was updated for the automatic AwaitingPayment step. Last run: 31 of 31 checks passed.
 
 Phase 3 storage: the database stores the photo path and size. The photo bucket and the compression step in the app come with the mobile and web work.
 
