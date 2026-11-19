@@ -1,5 +1,9 @@
-import { formatRupiah } from '@mitralink/shared';
+'use client';
+
+import { useEffect, useState } from 'react';
+import RoleGate from '@/components/RoleGate';
 import { getSupabase } from '@/lib/supabase';
+import { jakartaDate, ui } from '@/lib/ui';
 
 type KpiRow = { metric: string; value: number | null; target: number | null; unit: string };
 
@@ -13,50 +17,68 @@ const LABELS: Record<string, string> = {
   invoices_paid_on_time_pct: 'Faktur dibayar tepat waktu (%)',
 };
 
-function jakartaDate(offsetDays: number): string {
-  const d = new Date(Date.now() + offsetDays * 86_400_000);
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(d);
+export default function KpiPage() {
+  return (
+    <RoleGate role="admin">
+      <Kpi />
+    </RoleGate>
+  );
 }
 
-export default async function KpiPage() {
-  const supabase = getSupabase();
-  if (!supabase) {
-    return <p>Konfigurasi Supabase belum diisi (lihat .env.example).</p>;
+function Kpi() {
+  const [from, setFrom] = useState(jakartaDate(-6));
+  const [to, setTo] = useState(jakartaDate(0));
+  const [rows, setRows] = useState<KpiRow[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function load() {
+    const supabase = getSupabase();
+    if (!supabase) return;
+    const { data, error: rpcError } = await supabase.rpc('kpi_report', { p_from: from, p_to: to });
+    if (rpcError) {
+      setError(rpcError.message);
+      setRows(null);
+    } else {
+      setError(null);
+      setRows((data as KpiRow[]) ?? []);
+    }
   }
 
-  const from = jakartaDate(-6);
-  const to = jakartaDate(0);
-  const { data, error } = await supabase.rpc('kpi_report', { p_from: from, p_to: to });
+  useEffect(() => {
+    load();
+    // Loads once for the default period; the button reloads for the chosen one.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <section>
+    <section style={ui.page}>
       <h1>Laporan KPI</h1>
-      <p>Periode {from} sampai {to} (WIB). Menampilkan data hanya setelah admin masuk.</p>
-      {error ? (
-        <p style={{ color: '#9b3d2e' }}>Tidak dapat memuat: {error.message}</p>
-      ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div style={ui.row}>
+        <label>Dari <input type="date" style={ui.input} value={from} onChange={(e) => setFrom(e.target.value)} /></label>
+        <label>Sampai <input type="date" style={ui.input} value={to} onChange={(e) => setTo(e.target.value)} /></label>
+        <button style={ui.button} onClick={load}>Tampilkan</button>
+      </div>
+      {error ? <p style={ui.error}>{error}</p> : null}
+      {rows ? (
+        <table style={ui.table}>
           <thead>
             <tr>
-              <th style={{ textAlign: 'left' }}>Metrik</th>
-              <th style={{ textAlign: 'right' }}>Nilai</th>
-              <th style={{ textAlign: 'right' }}>Target</th>
+              <th style={ui.th}>Metrik</th>
+              <th style={{ ...ui.th, ...ui.right }}>Nilai</th>
+              <th style={{ ...ui.th, ...ui.right }}>Target</th>
             </tr>
           </thead>
           <tbody>
-            {(data as KpiRow[] | null)?.map((row) => (
-              <tr key={row.metric}>
-                <td>{LABELS[row.metric] ?? row.metric}</td>
-                <td style={{ textAlign: 'right' }}>{row.value ?? '—'}</td>
-                <td style={{ textAlign: 'right' }}>{row.target ?? '—'}</td>
+            {rows.map((r) => (
+              <tr key={r.metric}>
+                <td style={ui.td}>{LABELS[r.metric] ?? r.metric}</td>
+                <td style={{ ...ui.td, ...ui.right }}>{r.value ?? '—'}</td>
+                <td style={{ ...ui.td, ...ui.right }}>{r.target ?? '—'}</td>
               </tr>
             ))}
           </tbody>
         </table>
-      )}
-      <p style={{ color: '#5d6661', fontSize: 13 }}>
-        Contoh tampilan rupiah: {formatRupiah(25000)}.
-      </p>
+      ) : null}
     </section>
   );
 }
