@@ -15,7 +15,7 @@ Work in phases: plan, build, test, review. Do not skip the plan for data or mone
 
 ## Stack defaults
 
-Use the defaults in `docs/agent-workflow.md` section 5 unless the founder has decided otherwise:
+Use the stack in `docs/agent-workflow.md` section 5, which the founder has decided:
 
 - Mobile: React Native with Expo, TypeScript.
 - Web: Next.js, TypeScript.

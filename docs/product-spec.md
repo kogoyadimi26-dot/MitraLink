@@ -265,7 +265,9 @@ minimum_applied = (order_value × rate_bp / 10000) < 25000
 ```
 
 - `rate_bp` is the category rate in basis points (1.5% = 150).
-- Commission is calculated per category within an order, then summed. A minimum applies per order, not per line, so the minimum is applied once at order level after the per-line sum. (Decision: confirm with the founder before build. The current spreadsheet applies one rate per order.)
+- Confirmed by founder: the Rp25,000 minimum applies once per order, not per line. For an order with mixed categories, compute each line's commission, sum them, then apply the minimum to the total:
+  `commission = max( sum(line commissions), 25000 )`
+- Each line's commission is `round(line_value × rate_bp / 10000)`.
 - Rounding: round half up to whole rupiah.
 
 ## 9. Order code format
@@ -334,7 +336,7 @@ These feed the KPIs in the business requirements.
 
 See section 10 of the business requirements. Specific to the product:
 
-1. Commission minimum per order versus per line (section 8).
+1. ~~Commission minimum per order versus per line~~ Resolved: per order (section 8).
 2. Photo requirement for products: optional or required.
 3. Whether buyers can order from more than one distributor in one basket (current spec: one order per distributor).
 4. Language support beyond Bahasa Indonesia (Papuan languages) for later.

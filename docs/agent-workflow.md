@@ -71,7 +71,7 @@ If the API contract changes after mobile or web has started, the backend agent u
 
 ## 5. Stack defaults
 
-Defaults until the founder decides otherwise (business requirements section 10, item 5):
+Decided by the founder (business requirements section 10, item 5). Change only through a spec update first:
 
 | Layer | Default | Alternative |
 |---|---|---|

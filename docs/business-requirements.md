@@ -136,7 +136,7 @@ These rules are authoritative. Any feature that conflicts with them needs an exp
 2. Overdue invoice block period (BR-10).
 3. Agent fee amount (BR-11).
 4. Minimum commission: stay at Rp25,000 or move to Rp30,000 after the test (current decision: Rp25,000).
-5. Stack choice: React Native (Expo) or Flutter for mobile; Next.js for the web dashboard; Supabase and PowerSync as the backend and sync layer. Default in the product spec: React Native and Next.js.
+5. ~~Stack choice~~ **Decided (confirmed by founder):** React Native with Expo for the mobile app; Next.js for the web dashboard; Supabase with PowerSync for the backend and offline sync.
 6. Legal model for Phase 2 payments (BR-09).
 7. Tax treatment (BR-16).
 8. Which towns are in scope at launch beyond Wamena and Jayapura.
