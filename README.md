@@ -21,9 +21,10 @@ A marketplace where kios, warung, schools and churches in Papua find and order f
 | Area | Status |
 |---|---|
 | Repository layout and CI | Done: `.github/workflows/ci.yml` runs type check and tests |
-| Shared business rules (`packages/shared`) | Done: money, commission (FR-17), order state machine (product spec section 3), order codes, configuration with undecided values blocked. 30 tests pass. |
+| Shared business rules (`packages/shared`) | Done: money, commission (FR-17), order state machine (product spec section 3), order codes, configuration with undecided values blocked. 31 tests pass. |
+| Supabase project and schema (`supabase/`) | Done for development: project `mitralink` created; schema, reference data, row-level security and order functions applied; 32 database checks pass. See `supabase/README.md`. |
 | Starter Bahasa Indonesia strings | Done: `strings/id.json`, pending native-speaker review |
-| Supabase projects, schema and RLS | Not started: needs the Supabase project to be created (Phase 0 and Phase 1) |
+| Supabase staging and production projects | Not started: create after the pilot schema is reviewed |
 | Mobile app (Expo) | Not started: Phase 0 needs the Expo and Play Console accounts |
 | Web dashboard (Next.js) | Not started: Phase 0 needs the Vercel account |
 | Decisions D-001 to D-012 | Open: see `docs/decision-log.md` |

@@ -2,13 +2,16 @@
  * Commission calculation. Rules: BR-02, BR-03, BR-04, FR-17.
  *
  * Confirmed by the founder: the minimum applies once per order, not per line.
- * For an order with several categories, each line's commission is calculated,
- * the lines are summed, and the minimum is applied to the total:
  *
- *   commission = max( sum(line commissions), minimumCommission )
+ * Rounding is per category: all order lines in one category are added together,
+ * the category rate is applied to that total (rounded half up), and the category
+ * commissions are summed. The minimum is applied once to the order total:
  *
- * Only the server may call this to set a stored commission. The apps may call
- * it to display an estimate (BR-04).
+ *   commission = max( sum over categories of round(categoryValue × rate), minimum )
+ *
+ * The database function calculate_order_commission uses the same rule.
+ * Only the server may set a stored commission. The apps may call this to show
+ * an estimate (BR-04).
  */
 
 import { applyBasisPoints, assertRupiah, type Rupiah } from './money.js';
@@ -28,12 +31,13 @@ export interface CommissionLine {
 }
 
 export interface OrderCommission {
+  /** One entry per category, matching commission_lines in the database. */
   lines: CommissionLine[];
-  /** Sum of line commissions before the minimum. */
+  /** Sum of category commissions before the minimum. */
   subtotalCommission: Rupiah;
   /** Commission charged for the order. */
   commission: Rupiah;
-  /** True when the minimum raised the commission (FR-17, minimum_applied). */
+  /** True when the minimum raised the commission (minimum_applied). */
   minimumApplied: boolean;
   /** Order value: sum of line values. */
   orderValue: Rupiah;
@@ -44,21 +48,26 @@ export function calculateOrderCommission(lines: readonly OrderLine[], config: Bu
     throw new Error('An order must have at least one line');
   }
 
-  const commissionLines: CommissionLine[] = lines.map((line) => {
+  // Group by category first, so rounding happens once per category.
+  const totals = new Map<CategoryId, Rupiah>();
+  for (const line of lines) {
     assertRupiah(line.lineValue, 'lineValue');
-    const rateBp = rateFor(config, line.category);
+    totals.set(line.category, (totals.get(line.category) ?? 0) + line.lineValue);
+  }
+
+  const commissionLines: CommissionLine[] = [...totals.entries()].map(([category, basisAmount]) => {
+    const rateBp = rateFor(config, category);
     return {
-      category: line.category,
+      category,
       rateBp,
-      basisAmount: line.lineValue,
-      commissionAmount: applyBasisPoints(line.lineValue, rateBp),
+      basisAmount,
+      commissionAmount: applyBasisPoints(basisAmount, rateBp),
     };
   });
 
   const orderValue = lines.reduce((sum, line) => sum + line.lineValue, 0);
   const subtotalCommission = commissionLines.reduce((sum, line) => sum + line.commissionAmount, 0);
-  const minimum = config.minimumCommission;
-  const commission = Math.max(subtotalCommission, minimum);
+  const commission = Math.max(subtotalCommission, config.minimumCommission);
 
   return {
     lines: commissionLines,

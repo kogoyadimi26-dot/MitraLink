@@ -30,6 +30,7 @@ describe('order state machine (product spec section 3)', () => {
 
   it('lets the buyer raise a dispute and only admin resolve it (FR-15)', () => {
     expect(checkTransition('Shipped', 'Disputed', 'buyer').ok).toBe(true);
+    expect(checkTransition('Shipped', 'Disputed', 'agent').ok).toBe(true);
     expect(checkTransition('Shipped', 'Disputed', 'distributor').ok).toBe(false);
     expect(checkTransition('Disputed', 'Confirmed', 'admin').ok).toBe(true);
     expect(checkTransition('Disputed', 'Confirmed', 'distributor').ok).toBe(false);

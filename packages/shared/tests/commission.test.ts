@@ -59,6 +59,21 @@ describe('calculateOrderCommission (FR-17)', () => {
     }
   });
 
+  it('rounds per category, not per line (matches the database function)', () => {
+    // Two lines of 33 staples at 1.5%: per line each rounds to 0, but together
+    // 66 × 1.5% = 0.99, which rounds to 1. The category rule gives 1.
+    const config: BusinessConfig = { ...TEST_PHASE_CONFIG, minimumCommission: 0 };
+    const result = calculateOrderCommission(
+      [
+        { category: 'staples', lineValue: 33 },
+        { category: 'staples', lineValue: 33 },
+      ],
+      config,
+    );
+    expect(result.lines).toHaveLength(1);
+    expect(result.subtotalCommission).toBe(1);
+  });
+
   it('refuses restricted goods (BR-03)', () => {
     expect(() => calculateOrderCommission([{ category: 'restricted', lineValue: 100_000 }], TEST_PHASE_CONFIG)).toThrow(
       /restricted/,

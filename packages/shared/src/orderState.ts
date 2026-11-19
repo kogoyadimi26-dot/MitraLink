@@ -41,7 +41,7 @@ export const TRANSITIONS: readonly Rule[] = [
   { from: 'AwaitingPayment', to: 'Cancelled', actors: ['admin', 'system'] },
   { from: 'Paid', to: 'Shipped', actors: ['distributor'] },
   { from: 'Shipped', to: 'Confirmed', actors: ['buyer', 'system'] },
-  { from: 'Shipped', to: 'Disputed', actors: ['buyer'] },
+  { from: 'Shipped', to: 'Disputed', actors: ['buyer', 'agent'] },
   { from: 'Disputed', to: 'Confirmed', actors: ['admin'] },
   { from: 'Disputed', to: 'Cancelled', actors: ['admin'] },
 ];
