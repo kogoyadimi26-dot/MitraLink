@@ -51,7 +51,13 @@ Phase 5 is partly done. The sync rules are in `powersync/sync-rules.yaml` (draft
 
 `tests/phase7_admin.sql` covers configuration (changes audited, reason required, range and key checks), category change audit, the KPI figures against known data, the audit viewer (filters, page size, admin only), and admin block and unblock of a distributor. Last run: 21 of 21 checks passed.
 
-Phase 7 is partly done. Still to do: user suspension (needs the check in each function that acts for a user), agent payouts (wait for D-008), and the reports' weekly and monthly scheduling (a job, not a database change).
+`tests/phase7_completion.sql` covers user suspension (buyer, agent, and admin cannot suspend self), agent payouts (refused until D-008, only paid-invoice orders, no double payment, bank reference, admin only), the daily and weekly jobs (logged, skipped while D-007 is undecided), KPI snapshots, and the scheduler setup. Last run: 21 of 21 checks passed.
+
+Scheduled jobs: the daily job applies overdue blocks, and on the 1st of the month it also runs the monthly job. The weekly job creates last week's invoices and stores the weekly KPI snapshot. Every step writes a row to `job_runs` as ok, skipped or failed, so a failing step does not stop the others. A step that needs an undecided value is logged as skipped.
+
+Note for future migrations: the suspension check was added to nine existing functions by patching their definitions. If one of them is re-declared in a later migration, add `perform public.assert_account_active();` as its first statement.
+
+Phase 7 is complete for the database. Agent payouts still depend on D-008 before any payout can be generated.
 
 The Phase 1 test (`tests/db_rules.sql`) was updated for the automatic AwaitingPayment step. Last run: 31 of 31 checks passed.
 
