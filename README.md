@@ -10,6 +10,15 @@ A marketplace where kios, warung, schools and churches in Papua find and order f
 - [Business model](docs/business-model.md): who pays, commission rates, revenue and costs, break-even
 - [Four-week test plan](docs/test-plan.md): targets, weekly routine, tracking sheet, decision rules
 - [Terms and conditions](docs/terms-and-conditions.md): draft for buyers, distributors and agents, pending legal review
+- [Business requirements](docs/business-requirements.md): business rules, scope, KPIs, open decisions
+- [Product spec](docs/product-spec.md): personas, order state machine, functional requirements, screens, data model, acceptance scenarios
+- [Agent workflow](docs/agent-workflow.md): how AI agents build the web and mobile apps, phases, gates, review checklist
+
+## Claude Code skills
+
+- [`mitralink-spec`](.claude/skills/mitralink-spec/SKILL.md): trace a request to business rules before coding
+- [`mitralink-build`](.claude/skills/mitralink-build/SKILL.md): build rules for money, state, security, offline and language
+- [`mitralink-review`](.claude/skills/mitralink-review/SKILL.md): review a change against the specs
 
 ## Summary
 
