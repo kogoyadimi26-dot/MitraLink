@@ -13,6 +13,7 @@ Applied in order. Each file is the final state for its area.
 | `migrations/20261119000003_security_rls.sql` | Row-level security on every table, helper functions, grants, append-only audit and event tables |
 | `migrations/20261119000004_business_functions.sql` | `place_order`, `transition_order`, commission, order codes, restricted-goods guard, config audit |
 | `migrations/20261119000005_phase2_onboarding.sql` | Phase 2: `register_buyer`, `create_agent`, `register_distributor`, `approve_distributor`, `reject_distributor`; distributor documents (storage paths only); rejection reason |
+| `migrations/20261119000006_phase3_catalogue.sql` | Phase 3: `add_product`, `update_product`, `set_product_availability`, `admin_hide_product`, `admin_unhide_product`, `browse_catalogue`; photo limit 300 KB; products writable only through functions |
 
 Two fixes were found by testing and the security advisor and applied as separate migrations in the project. They are already included in files 003 and 004 here:
 
@@ -30,6 +31,10 @@ Auto-confirm period (D-006), overdue block period (D-007) and agent fee (D-008) 
 Last run: 32 of 32 checks passed.
 
 `tests/phase2_onboarding.sql` covers registration (buyer, agent, distributor), the agent town rule, duplicate phone numbers, terms acceptance, distributor approval and rejection, and who can see distributors and their documents. Last run: 22 of 22 checks passed.
+
+`tests/phase3_catalogue.sql` covers adding and changing products, the restricted-goods rule, the 300 KB photo limit and photo folder, browsing by town, admin hide and unhide, and ordering a hidden product. Last run: 22 of 22 checks passed.
+
+Phase 3 storage: the database stores the photo path and size. The photo bucket and the compression step in the app come with the mobile and web work.
 
 Phase 2 is partly done. Still to do: phone sign-in (needs D-001), the server step that creates the auth user for agent-assisted registration (an edge function), and the approval checklist (needs D-003).
 

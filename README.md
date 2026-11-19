@@ -24,6 +24,7 @@ A marketplace where kios, warung, schools and churches in Papua find and order f
 | Shared business rules (`packages/shared`) | Done: money, commission (FR-17), order state machine (product spec section 3), order codes, configuration with undecided values blocked. 31 tests pass. |
 | Supabase project and schema (`supabase/`) | Done for development: project `mitralink` created; schema, reference data, row-level security and order functions applied; 32 database checks pass. See `supabase/README.md`. |
 | Phase 2 database (registration, approval) | Done for development: buyer, agent and distributor registration, admin approval and rejection, distributor documents. 22 database checks pass. Phone sign-in waits for D-001. |
+| Phase 3 database (catalogue) | Done for development: add, change and show products, restricted-goods rule, 300 KB photo limit, town catalogue, admin hide and unhide. 22 database checks pass. Photo storage bucket and app compression come with the apps. |
 | Starter Bahasa Indonesia strings | Done: `strings/id.json`, pending native-speaker review |
 | Supabase staging and production projects | Not started: create after the pilot schema is reviewed |
 | Mobile app (Expo) | Not started: Phase 0 needs the Expo and Play Console accounts |
