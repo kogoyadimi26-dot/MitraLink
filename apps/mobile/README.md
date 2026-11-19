@@ -26,9 +26,12 @@ Basket rules live in `lib/cart.ts` and have tests (`npm run test --workspace @mi
 
 In the Supabase dashboard, under Authentication, turn on the Phone provider, choose the SMS provider, and enter that provider's credentials. Until this is done, sending a code shows the provider error.
 
+## Registration
+
+After the first sign-in, a buyer with no profile sees the registration form: name, business name, business type, town and acceptance of the terms (version v1). It calls `register_buyer`. Agents and admins are created by admin, not in the app. Distributors register on the web.
+
 ## Not built yet
 
-- Registration after the first sign-in (a new user has no profile until one is created with register_buyer)
 
 - Working with a signed-in user: the screens call the database directly, so they work online only
 - Offline queue and sync status (uses PowerSync, waits for the PowerSync project)

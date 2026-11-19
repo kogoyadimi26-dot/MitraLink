@@ -26,7 +26,7 @@ Every page sits behind `RoleGate`, which only decides what to show. The database
 
 Sign-in is at `/masuk`: a phone number, then a one-time code by SMS. The session is kept in the browser. Each page checks that the signed-in user has the right role and an active profile. Sign-in needs the phone provider turned on in the Supabase project (decision D-001).
 
-A new user has no profile until one is created with register_buyer or register_distributor, so after the first sign-in they see "no access" until registration exists.
+After the first sign-in, a distributor with no profile sees the registration form on `/masuk` (it calls `register_distributor`). The account then waits for admin approval. Agents and admins are created by admin.
 
 ## Checks
 

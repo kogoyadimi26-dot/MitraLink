@@ -5,7 +5,7 @@ import { getSupabase } from '@/lib/supabase';
 import { ui } from '@/lib/ui';
 
 type Role = 'admin' | 'distributor';
-type Status = 'checking' | 'ok' | 'signin' | 'wrongrole' | 'unconfigured';
+type Status = 'checking' | 'ok' | 'signin' | 'noprofile' | 'wrongrole' | 'unconfigured';
 
 /**
  * Shows its children only to a signed-in, active user with the given role. Access is still enforced
@@ -28,7 +28,11 @@ export default function RoleGate({ role, children }: { role: Role; children: Rea
         return;
       }
       const { data: profile } = await supabase.from('profiles').select('role, status').eq('id', uid).maybeSingle();
-      if (!profile || profile.role !== role || profile.status !== 'active') {
+      if (!profile) {
+        setStatus('noprofile');
+        return;
+      }
+      if (profile.role !== role || profile.status !== 'active') {
         setStatus('wrongrole');
         return;
       }
@@ -42,6 +46,13 @@ export default function RoleGate({ role, children }: { role: Role; children: Rea
     return (
       <p style={ui.error}>
         Masuk diperlukan. <a href="/masuk">Masuk dengan nomor HP</a>.
+      </p>
+    );
+  }
+  if (status === 'noprofile') {
+    return (
+      <p style={ui.error}>
+        Akun belum terdaftar. <a href="/masuk">Lanjutkan pendaftaran di halaman Masuk</a>.
       </p>
     );
   }

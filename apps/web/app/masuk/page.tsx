@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { normalizeIndonesianPhone } from '@mitralink/shared';
 import { getSupabase } from '@/lib/supabase';
 import { ui } from '@/lib/ui';
+import RegisterDistributor from '@/components/RegisterDistributor';
 
 /**
  * Sign-in with a one-time code sent by SMS. The SMS provider must be set up in the Supabase
@@ -17,11 +18,29 @@ export default function MasukPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [signedInAs, setSignedInAs] = useState<string | null>(null);
+  // null = not checked yet; false = signed in but no profile (needs registration); true = has a profile.
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null);
+
+  async function checkProfile(userId: string | null) {
+    const supabase = getSupabase();
+    if (!supabase || !userId) {
+      setHasProfile(null);
+      return;
+    }
+    const { data } = await supabase.from('profiles').select('id').eq('id', userId).maybeSingle();
+    setHasProfile(!!data);
+  }
 
   useEffect(() => {
     const supabase = getSupabase();
     if (!supabase) return;
-    supabase.auth.getSession().then(({ data }) => setSignedInAs(data.session?.user.id ?? null));
+    supabase.auth.getSession().then(({ data }) => {
+      const uid = data.session?.user.id ?? null;
+      setSignedInAs(uid);
+      checkProfile(uid);
+    });
+    // checkProfile reads the database only; it is run once when the page opens.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function requestCode() {
@@ -58,17 +77,29 @@ export default function MasukPage() {
       setMessage({ ok: false, text: 'Kode salah atau sudah kedaluwarsa. Coba lagi.' });
       return;
     }
-    setSignedInAs(data.session?.user.id ?? null);
+    const uid = data.session?.user.id ?? null;
+    setSignedInAs(uid);
     setMessage({ ok: true, text: 'Anda sudah masuk.' });
+    checkProfile(uid);
   }
 
   async function signOut() {
     const supabase = getSupabase();
     if (supabase) await supabase.auth.signOut();
     setSignedInAs(null);
+    setHasProfile(null);
     setStep('phone');
     setCode('');
     setMessage({ ok: true, text: 'Anda sudah keluar.' });
+  }
+
+  if (signedInAs && hasProfile === false) {
+    return (
+      <section style={ui.page}>
+        <RegisterDistributor onRegistered={() => checkProfile(signedInAs)} />
+        <button style={ui.buttonOutline} onClick={signOut}>Keluar</button>
+      </section>
+    );
   }
 
   if (signedInAs) {

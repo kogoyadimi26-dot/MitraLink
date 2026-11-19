@@ -34,3 +34,30 @@ export async function signOut(): Promise<void> {
   const supabase = getSupabase();
   if (supabase) await supabase.auth.signOut();
 }
+
+export type Profile = { role: 'buyer' | 'agent' | 'distributor' | 'admin'; status: string } | null;
+
+/**
+ * The signed-in user's profile, or null when the account has none yet (it needs registration).
+ * Row-level security returns only the user's own profile.
+ */
+export async function currentProfile(): Promise<Profile> {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+  const { data: session } = await supabase.auth.getSession();
+  const uid = session.session?.user.id;
+  if (!uid) return null;
+  const { data } = await supabase.from('profiles').select('role, status').eq('id', uid).maybeSingle();
+  return (data as Profile) ?? null;
+}
+
+/** The phone number the user signed in with, in the stored +62 form, or null. */
+export async function currentPhone(): Promise<string | null> {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+  const { data } = await supabase.auth.getSession();
+  return data.session?.user.phone ?? null;
+}
+
+/** Version of the terms the user accepts at registration (FR-02). The terms are still a draft. */
+export const TERMS_VERSION = 'v1';

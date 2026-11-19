@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, SafeAreaView, StyleSheet, Text, View, Pressable } from 'react-native';
 import { getSupabase } from './lib/supabase';
-import { signOut } from './lib/session';
+import { currentProfile, signOut, type Profile } from './lib/session';
+import RegisterBuyer from './screens/RegisterBuyer';
 import SignIn from './screens/SignIn';
 import Catalogue from './screens/Catalogue';
 import Basket from './screens/Basket';
@@ -24,6 +25,8 @@ export default function App() {
   // null = checking, false = signed out, true = signed in.
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [configured] = useState(() => getSupabase() !== null);
+  // null = not loaded yet; undefined = no profile yet (needs registration).
+  const [profile, setProfile] = useState<Profile | undefined | null>(null);
 
   useEffect(() => {
     const supabase = getSupabase();
@@ -32,6 +35,15 @@ export default function App() {
     const { data } = supabase.auth.onAuthStateChange((_event, session) => setSignedIn(!!session));
     return () => data.subscription.unsubscribe();
   }, []);
+
+  // Once signed in, load the profile. A user with no profile sees the registration form.
+  useEffect(() => {
+    if (signedIn !== true) {
+      setProfile(null);
+      return;
+    }
+    currentProfile().then((p) => setProfile(p ?? undefined));
+  }, [signedIn]);
 
   if (!configured) {
     return (
@@ -55,6 +67,35 @@ export default function App() {
     return (
       <SafeAreaView style={styles.safe}>
         <SignIn onSignedIn={() => setSignedIn(true)} />
+      </SafeAreaView>
+    );
+  }
+
+  if (profile === null) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.page}>
+          <ActivityIndicator />
+        </View>
+      </SafeAreaView>
+    );
+  }
+  if (profile === undefined) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <RegisterBuyer onRegistered={() => currentProfile().then((p) => setProfile(p ?? undefined))} />
+      </SafeAreaView>
+    );
+  }
+  if (profile.role !== 'buyer' && profile.role !== 'agent') {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.page}>
+          <Text style={styles.error}>Aplikasi ini untuk pembeli. Distributor dan admin memakai dashboard web.</Text>
+          <Pressable onPress={() => signOut().then(() => setSignedIn(false))}>
+            <Text style={styles.link}>Keluar</Text>
+          </Pressable>
+        </View>
       </SafeAreaView>
     );
   }
