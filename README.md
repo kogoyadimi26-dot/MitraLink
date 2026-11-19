@@ -9,6 +9,7 @@ A marketplace where kios, warung, schools and churches in Papua find and order f
 - [Business plan](docs/business-plan.md): problem, solution, customers, operations, risks, funding
 - [Business model](docs/business-model.md): who pays, commission rates, revenue and costs, break-even
 - [Four-week test plan](docs/test-plan.md): targets, weekly routine, tracking sheet, decision rules
+- [Terms and conditions](docs/terms-and-conditions.md): draft for buyers, distributors and agents, pending legal review
 
 ## Summary
 
