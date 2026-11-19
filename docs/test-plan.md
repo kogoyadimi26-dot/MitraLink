@@ -41,9 +41,12 @@
    Please reply ACCEPT, then SHIP when sent.
    ```
 
-4. Distributor replies ACCEPT, ships, and replies SHIP with the date.
+4. Distributor replies ACCEPT and asks the buyer to pay.
 5. Buyer pays the distributor by bank transfer, with the order code in the transfer reference. The distributor replies PAID after checking the bank.
-6. Buyer replies RECEIVED to the agent. The agent marks the order confirmed.
+6. Distributor ships only after PAID, and replies SHIP with the date.
+7. Buyer replies RECEIVED to the agent. The agent marks the order confirmed.
+
+Shipping after payment is a rule for every buyer during the test, not just new ones.
 
 Only orders in **Confirmed** status count toward targets.
 
