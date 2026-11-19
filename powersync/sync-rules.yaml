@@ -1,0 +1,76 @@
+# PowerSync sync rules for MitraLink (Phase 5, FR-30, FR-31, NFR-01).
+#
+# Status: draft. Validate in the PowerSync dashboard once the project exists, then deploy.
+# The tables come from the publication "powersync" (supabase/migrations/20261119000009_phase5_sync.sql).
+# Row-level security does not apply to the sync stream, so every rule must filter by the user.
+#
+# Not synced to devices, ever: distributor_private (bank and tax details), audit_log,
+# client_actions, sync_log, town_sequences, invoice_orders for other distributors.
+#
+# Known gap: FR-31 asks for 30 days of order history on the device. A time window is not
+# expressed here yet. Add it once the PowerSync version in use supports the needed date filter.
+# Until then, buyers and agents keep their full order history on the device.
+
+bucket_definitions:
+
+  # Reference data, the same for everyone.
+  reference:
+    data:
+      - SELECT id, code, name, active FROM towns
+      - SELECT id, name, restricted, rate_bp FROM categories
+      - SELECT key, value FROM config WHERE key IN ('minimum_commission', 'invoice_due_days')
+
+  # Buyers: their own profile and buyer record.
+  buyer_self:
+    parameters: SELECT id AS user_id FROM buyers WHERE id = request.user_id()
+    data:
+      - SELECT id, business_name, business_type, town_id, agent_id FROM buyers WHERE id = bucket.user_id
+      - SELECT id, role, full_name, status FROM profiles WHERE id = bucket.user_id
+
+  # Catalogue for the buyer's town: approved, unblocked distributors, visible (not hidden) products,
+  # never restricted categories.
+  buyer_catalogue:
+    parameters: SELECT town_id FROM buyers WHERE id = request.user_id()
+    data:
+      - SELECT d.id, d.business_name, d.town_id, d.approval_status
+          FROM distributors d
+         WHERE d.town_id = bucket.town_id AND d.approval_status = 'approved' AND d.blocked_at IS NULL
+      - SELECT p.id, p.distributor_id, p.category_id, p.name, p.unit, p.price, p.available, p.photo_path
+          FROM products p
+          JOIN distributors d ON d.id = p.distributor_id
+          JOIN categories c ON c.id = p.category_id
+         WHERE d.town_id = bucket.town_id AND d.approval_status = 'approved' AND d.blocked_at IS NULL
+           AND p.hidden_reason IS NULL AND c.restricted = false
+
+  # Buyers' own orders and everything attached to them.
+  buyer_orders:
+    parameters: SELECT id AS buyer_id FROM buyers WHERE id = request.user_id()
+    data:
+      - SELECT * FROM orders WHERE buyer_id = bucket.buyer_id
+      - SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.buyer_id = bucket.buyer_id
+      - SELECT oe.* FROM order_events oe JOIN orders o ON o.id = oe.order_id WHERE o.buyer_id = bucket.buyer_id
+      - SELECT pp.* FROM payment_proofs pp JOIN orders o ON o.id = pp.order_id WHERE o.buyer_id = bucket.buyer_id
+      - SELECT n.* FROM notifications n WHERE n.recipient_id = bucket.buyer_id
+
+  # Agents: their own record, their buyers and those buyers' orders.
+  agent_work:
+    parameters: SELECT id AS agent_id FROM agents WHERE id = request.user_id()
+    data:
+      - SELECT * FROM agents WHERE id = bucket.agent_id
+      - SELECT * FROM buyers WHERE agent_id = bucket.agent_id
+      - SELECT * FROM orders WHERE agent_id = bucket.agent_id
+      - SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.agent_id = bucket.agent_id
+      - SELECT oe.* FROM order_events oe JOIN orders o ON o.id = oe.order_id WHERE o.agent_id = bucket.agent_id
+      - SELECT n.* FROM notifications n WHERE n.recipient_id = bucket.agent_id
+
+  # Distributors: their own products, orders, invoices and notifications.
+  distributor_work:
+    parameters: SELECT id AS distributor_id FROM distributors WHERE id = request.user_id()
+    data:
+      - SELECT * FROM distributors WHERE id = bucket.distributor_id
+      - SELECT * FROM products WHERE distributor_id = bucket.distributor_id
+      - SELECT * FROM orders WHERE distributor_id = bucket.distributor_id
+      - SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.distributor_id = bucket.distributor_id
+      - SELECT oe.* FROM order_events oe JOIN orders o ON o.id = oe.order_id WHERE o.distributor_id = bucket.distributor_id
+      - SELECT * FROM invoices WHERE distributor_id = bucket.distributor_id
+      - SELECT n.* FROM notifications n WHERE n.recipient_id = bucket.distributor_id
