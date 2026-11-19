@@ -3,7 +3,8 @@
   "private": true,
   "description": "Papua Distribution Connect: marketplace for kios, warung, schools and churches in Papua",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present",

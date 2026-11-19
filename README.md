@@ -31,8 +31,8 @@ A marketplace where kios, warung, schools and churches in Papua find and order f
 | Phase 4 database (ordering and fulfilment) | Done for development: decline and cancel reasons, automatic AwaitingPayment, payment instructions, proof photos, payment reversal, dispute photos, notification queue. 23 database checks pass. SMS sending waits for D-001. |
 | Starter Bahasa Indonesia strings | Done: `strings/id.json`, pending native-speaker review |
 | Supabase staging and production projects | Not started: create after the pilot schema is reviewed |
-| Mobile app (Expo) | Not started: Phase 0 needs the Expo and Play Console accounts |
-| Web dashboard (Next.js) | Not started: Phase 0 needs the Vercel account |
+| Mobile app (Expo, `apps/mobile`) | Scaffold done, runs locally: home and Jayapura catalogue screens; bundles for Android. Sign-in, basket and offline sync still to build. |
+| Web dashboard (Next.js, `apps/web`) | Scaffold done, builds: home, admin KPI report, admin approvals. Sign-in still to build. |
 | Decisions D-001 to D-012 | Open: see `docs/decision-log.md` |
 
 Run locally: `npm install`, then `npm run typecheck` and `npm test`.

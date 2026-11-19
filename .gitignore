@@ -27,3 +27,7 @@ google-services.json
 
 # Supabase local development
 supabase/.temp/
+
+# Next.js build output
+.next/
+out/

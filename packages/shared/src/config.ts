@@ -5,7 +5,7 @@
  * Decisions: see docs/decision-log.md (D-006, D-007, D-008).
  */
 
-import { assertBasisPoints, assertRupiah, type BasisPoints, type Rupiah } from './money.js';
+import { assertBasisPoints, assertRupiah, type BasisPoints, type Rupiah } from './money';
 
 export type CategoryId = 'staples' | 'school_office' | 'household' | 'electronics_tools' | 'restricted';
 

@@ -14,8 +14,8 @@
  * an estimate (BR-04).
  */
 
-import { applyBasisPoints, assertRupiah, type Rupiah } from './money.js';
-import { rateFor, type BusinessConfig, type CategoryId } from './config.js';
+import { applyBasisPoints, assertRupiah, type Rupiah } from './money';
+import { rateFor, type BusinessConfig, type CategoryId } from './config';
 
 export interface OrderLine {
   category: CategoryId;
