@@ -16,6 +16,20 @@ A marketplace where kios, warung, schools and churches in Papua find and order f
 - [Build plan](docs/build-plan.md): end-to-end plan, phases 0 to 10, exit gates, decisions by phase, testing, risks
 - [Decision log](docs/decision-log.md): blocking decisions D-001 to D-012, with options, recommendations and status
 
+## Build status
+
+| Area | Status |
+|---|---|
+| Repository layout and CI | Done: `.github/workflows/ci.yml` runs type check and tests |
+| Shared business rules (`packages/shared`) | Done: money, commission (FR-17), order state machine (product spec section 3), order codes, configuration with undecided values blocked. 30 tests pass. |
+| Starter Bahasa Indonesia strings | Done: `strings/id.json`, pending native-speaker review |
+| Supabase projects, schema and RLS | Not started: needs the Supabase project to be created (Phase 0 and Phase 1) |
+| Mobile app (Expo) | Not started: Phase 0 needs the Expo and Play Console accounts |
+| Web dashboard (Next.js) | Not started: Phase 0 needs the Vercel account |
+| Decisions D-001 to D-012 | Open: see `docs/decision-log.md` |
+
+Run locally: `npm install`, then `npm run typecheck` and `npm test`.
+
 ## Claude Code skills
 
 - [`mitralink-spec`](.claude/skills/mitralink-spec/SKILL.md): trace a request to business rules before coding

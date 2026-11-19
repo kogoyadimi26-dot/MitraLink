@@ -1,0 +1,49 @@
+{
+  "_comment": "Bahasa Indonesia user-facing text (NFR-10). Keys are stable; change the text, not the key. Review by a native speaker before release (build plan Phase 8).",
+  "common": {
+    "appName": "MitraLink",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "retry": "Coba lagi",
+    "back": "Kembali",
+    "loading": "Memuat..."
+  },
+  "sync": {
+    "allSynced": "Semua data sudah tersinkron",
+    "pending": "Menunggu sinkron",
+    "pendingCount": "{count} pesanan menunggu sinkron",
+    "lastSynced": "Terakhir tersinkron: {time}",
+    "conflict": "Ada perubahan dari distributor. Periksa pesanan Anda."
+  },
+  "auth": {
+    "phoneLabel": "Nomor HP",
+    "sendCode": "Kirim kode",
+    "codeSent": "Kode dikirim ke {phone}",
+    "codeLabel": "Kode dari SMS",
+    "wrongCode": "Kode salah. Coba lagi.",
+    "tooManyTries": "Terlalu banyak percobaan. Coba lagi dalam 15 menit.",
+    "phoneAlreadyRegistered": "Nomor ini sudah terdaftar."
+  },
+  "order": {
+    "place": "Kirim pesanan",
+    "placed": "Pesanan {code} sudah dikirim ke distributor",
+    "accepted": "Distributor menerima pesanan {code}",
+    "declined": "Distributor tidak dapat memenuhi pesanan {code}",
+    "payNow": "Silakan transfer ke rekening distributor dan tulis kode {code} di kolom berita.",
+    "paid": "Pembayaran dikonfirmasi",
+    "shipped": "Pesanan dikirim pada {date}",
+    "confirmReceipt": "Barang sudah diterima?",
+    "received": "Terima kasih, pesanan sudah diterima",
+    "disputeRaise": "Ada masalah dengan pesanan ini?",
+    "confirmed": "Pesanan selesai"
+  },
+  "money": {
+    "total": "Total",
+    "minimumNote": "Minimal komisi Rp25.000 per pesanan"
+  },
+  "errors": {
+    "generic": "Terjadi kesalahan. Coba lagi.",
+    "offline": "Tidak ada koneksi. Pesanan disimpan dan akan dikirim saat online.",
+    "notAllowed": "Anda tidak dapat melakukan tindakan ini."
+  }
+}

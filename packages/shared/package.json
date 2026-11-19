@@ -1,0 +1,13 @@
+{
+  "name": "@mitralink/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Business rules shared by the mobile app, web dashboard and server: money, commission, order state, order codes, configuration",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  }
+}

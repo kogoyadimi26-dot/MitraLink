@@ -1,0 +1,20 @@
+{
+  "name": "mitralink",
+  "private": true,
+  "description": "Papua Distribution Connect: marketplace for kios, warung, schools and churches in Papua",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "typescript": "5.6.3",
+    "vitest": "2.1.4"
+  }
+}
