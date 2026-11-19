@@ -14,6 +14,7 @@ A marketplace where kios, warung, schools and churches in Papua find and order f
 - [Product spec](docs/product-spec.md): personas, order state machine, functional requirements, screens, data model, acceptance scenarios
 - [Agent workflow](docs/agent-workflow.md): how AI agents build the web and mobile apps, phases, gates, review checklist
 - [Build plan](docs/build-plan.md): end-to-end plan, phases 0 to 10, exit gates, decisions by phase, testing, risks
+- [Decision log](docs/decision-log.md): blocking decisions D-001 to D-012, with options, recommendations and status
 
 ## Claude Code skills
 
