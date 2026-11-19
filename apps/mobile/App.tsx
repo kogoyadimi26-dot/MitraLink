@@ -9,6 +9,8 @@ import Basket from './screens/Basket';
 import Orders from './screens/Orders';
 import OrderDetail from './screens/OrderDetail';
 import { addToCart, type CartItem } from './lib/cart';
+import { useOutbox } from './lib/useOutbox';
+import SyncStatus from './screens/SyncStatus';
 
 type Screen =
   | { name: 'home' }
@@ -20,8 +22,9 @@ type Screen =
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'home' });
   const [cart, setCart] = useState<CartItem[]>([]);
-  // Bumped after an order changes, so the order list reloads.
+  // Bumped after queued actions reach the server, so the order list and order detail reload.
   const [refreshKey, setRefreshKey] = useState(0);
+  const outbox = useOutbox(() => setRefreshKey((k) => k + 1));
   // null = checking, false = signed out, true = signed in.
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [configured] = useState(() => getSupabase() !== null);
@@ -102,6 +105,12 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <SyncStatus
+        items={outbox.items}
+        syncing={outbox.syncing}
+        onRetry={() => outbox.flushNow()}
+        onDismiss={outbox.dismissItem}
+      />
       {screen.name === 'home' ? (
         <Home
           onCatalogue={() => setScreen({ name: 'catalogue' })}
@@ -125,10 +134,10 @@ export default function App() {
         <Basket
           cart={cart}
           onChange={setCart}
+          enqueueAction={outbox.enqueueAction}
           onOrdersPlaced={(distributorIds) => {
-            // Remove the lines of each distributor whose order was sent.
+            // Remove the lines of each distributor whose order is now queued.
             setCart((items) => items.filter((i) => !distributorIds.includes(i.distributorId)));
-            setRefreshKey((k) => k + 1);
           }}
           onBack={() => setScreen({ name: 'catalogue' })}
         />
@@ -143,7 +152,8 @@ export default function App() {
       {screen.name === 'order' ? (
         <OrderDetail
           orderId={screen.orderId}
-          onChanged={() => setRefreshKey((k) => k + 1)}
+          enqueueAction={outbox.enqueueAction}
+          refreshKey={refreshKey}
           onBack={() => setScreen({ name: 'orders' })}
         />
       ) : null}

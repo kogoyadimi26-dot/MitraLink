@@ -3,54 +3,40 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { getSupabase } from '../lib/supabase';
 import { currentUserId } from '../lib/session';
 import { money } from '../lib/labels';
-import {
-  buildPlaceOrderPayload,
-  groupByDistributor,
-  newClientId,
-  setQuantity,
-  type CartItem,
-  type DistributorGroup,
-} from '../lib/cart';
+import { groupByDistributor, setQuantity, type CartItem, type DistributorGroup } from '../lib/cart';
+import type { ActionKind } from '../lib/outbox';
 
 type Props = {
   cart: CartItem[];
   onChange: (items: CartItem[]) => void;
   onOrdersPlaced: (distributorIds: string[]) => void;
+  enqueueAction: (action: ActionKind, payload: Record<string, unknown>) => string;
   onBack: () => void;
 };
 
-export default function Basket({ cart, onChange, onOrdersPlaced, onBack }: Props) {
+export default function Basket({ cart, onChange, onOrdersPlaced, enqueueAction, onBack }: Props) {
   const [message, setMessage] = useState<string | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
   const groups = groupByDistributor(cart);
 
   function changeQuantity(productId: string, quantity: number) {
     onChange(setQuantity(cart, productId, quantity));
   }
 
+  // The order is saved on the phone at once and sent when online. Its client id is the order's
+  // client id, so a retry never creates a second order.
   async function send(group: DistributorGroup) {
     setMessage(null);
-    const supabase = getSupabase();
     const buyerId = await currentUserId();
-    if (!supabase) {
-      setMessage('Konfigurasi Supabase belum diisi (lihat .env.example).');
-      return;
-    }
     if (!buyerId) {
       setMessage('Masuk diperlukan untuk mengirim pesanan.');
       return;
     }
-    setBusy(group.distributorId);
-    // The client id makes a retry safe: the server returns the same order instead of a second one.
-    const payload = buildPlaceOrderPayload(buyerId, group, newClientId());
-    const { data, error } = await supabase.rpc('place_order', payload);
-    setBusy(null);
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
-    const code = (data as { code?: string } | null)?.code ?? '';
-    setMessage(`Pesanan ${code} sudah dikirim ke ${group.distributorName}.`);
+    enqueueAction('place_order', {
+      buyer_id: buyerId,
+      distributor_id: group.distributorId,
+      items: group.items.map((i) => ({ product_id: i.productId, quantity: i.quantity })),
+    });
+    setMessage(`Pesanan ke ${group.distributorName} disimpan. Akan dikirim saat tersambung.`);
     onOrdersPlaced([group.distributorId]);
   }
 
@@ -85,8 +71,8 @@ export default function Basket({ cart, onChange, onOrdersPlaced, onBack }: Props
           ))}
           <Text style={styles.body}>Total: {money(group.subtotal)}</Text>
           <Text style={styles.note}>Pembayaran dilakukan langsung ke distributor setelah distributor menerima pesanan.</Text>
-          <Pressable style={styles.button} onPress={() => send(group)} disabled={busy === group.distributorId}>
-            <Text style={styles.buttonText}>{busy === group.distributorId ? 'Mengirim...' : 'Kirim pesanan'}</Text>
+          <Pressable style={styles.button} onPress={() => send(group)}>
+            <Text style={styles.buttonText}>Kirim pesanan</Text>
           </Pressable>
         </View>
       ))}

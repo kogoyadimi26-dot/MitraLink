@@ -30,6 +30,17 @@ In the Supabase dashboard, under Authentication, turn on the Phone provider, cho
 
 After the first sign-in, a buyer with no profile sees the registration form: name, business name, business type, town and acceptance of the terms (version v1). It calls `register_buyer`. Agents and admins are created by admin, not in the app. Distributors register on the web.
 
+## Offline queue (Phase 5)
+
+Orders, receipt confirmations and problem reports are saved on the phone at once. They are sent in the order they were made when the phone is online: on start, when the connection returns (NetInfo), and when the user taps "Kirim ulang". Each action carries a client id, so a retry never creates a duplicate. The server answers applied, duplicate, conflict or rejected:
+
+- applied or duplicate: the item leaves the queue
+- conflict (for example, the order was cancelled in the meantime) or rejected: it stays in the status bar with the reason, until the user taps "Mengerti"
+
+Rules are in `lib/outbox.ts` (tests in `tests/outbox.test.ts`). Storage is `lib/outboxStore.ts` (AsyncStorage). Sending is `lib/outboxSync.ts`, which calls `sync_action`. A failed request is not treated as an answer, so the item waits and is sent again.
+
+Not offline yet: viewing the catalogue and the order list needs a connection. A local copy of recent orders and the catalogue comes with PowerSync.
+
 ## Not built yet
 
 

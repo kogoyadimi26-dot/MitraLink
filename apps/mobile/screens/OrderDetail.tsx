@@ -2,20 +2,24 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { getSupabase } from '../lib/supabase';
 import { STATE_LABEL, money } from '../lib/labels';
-import { newClientId } from '../lib/cart';
+import type { ActionKind } from '../lib/outbox';
 
 type Order = { id: string; code: string; state: string; subtotal: number };
 type PaymentInfo = { bank_name: string; bank_account: string; distributor_name: string; amount: number };
 
-type Props = { orderId: string; onBack: () => void; onChanged: () => void };
+type Props = {
+  orderId: string;
+  onBack: () => void;
+  enqueueAction: (action: ActionKind, payload: Record<string, unknown>) => string;
+  refreshKey: number;
+};
 
-export default function OrderDetail({ orderId, onBack, onChanged }: Props) {
+export default function OrderDetail({ orderId, onBack, enqueueAction, refreshKey }: Props) {
   const [order, setOrder] = useState<Order | null>(null);
   const [payment, setPayment] = useState<PaymentInfo | null>(null);
   const [reason, setReason] = useState('');
   const [showDispute, setShowDispute] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
 
   async function load() {
     const supabase = getSupabase();
@@ -44,44 +48,28 @@ export default function OrderDetail({ orderId, onBack, onChanged }: Props) {
 
   useEffect(() => {
     load();
-    // load is re-run when the order id changes; it reads only the given order.
+    // Reloads when the order changes or when queued actions have been applied.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderId]);
+  }, [orderId, refreshKey]);
 
   // The buyer confirms receipt. The client id makes a retry safe.
-  async function confirmReceipt() {
-    await runTransition('Confirmed', null, null);
+  function confirmReceipt() {
+    runTransition('Confirmed', null, null);
   }
 
-  async function raiseDispute() {
+  function raiseDispute() {
     if (reason.trim().length === 0) {
       setMessage('Tulis alasan masalah dengan singkat.');
       return;
     }
-    await runTransition('Disputed', null, reason.trim());
+    runTransition('Disputed', null, reason.trim());
   }
 
-  async function runTransition(to: string, reference: string | null, note: string | null) {
-    const supabase = getSupabase();
-    if (!supabase) return;
-    setBusy(true);
-    setMessage(null);
-    const { data, error } = await supabase.rpc('transition_order', {
-      p_order_id: orderId,
-      p_to: to,
-      p_client_id: newClientId(),
-      p_reference: reference,
-      p_note: note,
-    });
-    setBusy(false);
-    if (error) {
-      setMessage(error.message);
-      return;
-    }
-    setMessage(`Status sekarang: ${STATE_LABEL[(data as { state?: string })?.state ?? ''] ?? to}`);
+  // Saved on the phone at once and sent when online (see useOutbox). The order reloads after it is applied.
+  function runTransition(to: string, reference: string | null, note: string | null) {
+    enqueueAction('transition', { order_id: orderId, to, reference, note });
     setShowDispute(false);
-    onChanged();
-    load();
+    setMessage('Disimpan. Akan dikirim saat tersambung.');
   }
 
   if (message && !order) {
@@ -125,7 +113,7 @@ export default function OrderDetail({ orderId, onBack, onChanged }: Props) {
       {order.state === 'Shipped' ? (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Barang sudah diterima?</Text>
-          <Pressable style={styles.button} onPress={confirmReceipt} disabled={busy}>
+          <Pressable style={styles.button} onPress={confirmReceipt} disabled={false}>
             <Text style={styles.buttonText}>Sudah terima</Text>
           </Pressable>
           {showDispute ? (
@@ -137,7 +125,7 @@ export default function OrderDetail({ orderId, onBack, onChanged }: Props) {
                 onChangeText={setReason}
                 multiline
               />
-              <Pressable style={styles.buttonOutline} onPress={raiseDispute} disabled={busy}>
+              <Pressable style={styles.buttonOutline} onPress={raiseDispute} disabled={false}>
                 <Text style={styles.buttonOutlineText}>Kirim laporan masalah</Text>
               </Pressable>
             </>
