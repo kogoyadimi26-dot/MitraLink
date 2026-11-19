@@ -8,7 +8,7 @@
     "start": "expo start",
     "android": "expo start --android",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"no mobile tests yet\" && exit 0"
+    "test": "vitest run"
   },
   "dependencies": {
     "@mitralink/shared": "0.1.0",
