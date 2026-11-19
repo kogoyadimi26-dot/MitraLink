@@ -12,6 +12,7 @@ Applied in order. Each file is the final state for its area.
 | `migrations/20261119000002_reference_data.sql` | Towns J and W (active), categories and rates, Rp25,000 minimum, transition rules |
 | `migrations/20261119000003_security_rls.sql` | Row-level security on every table, helper functions, grants, append-only audit and event tables |
 | `migrations/20261119000004_business_functions.sql` | `place_order`, `transition_order`, commission, order codes, restricted-goods guard, config audit |
+| `migrations/20261119000005_phase2_onboarding.sql` | Phase 2: `register_buyer`, `create_agent`, `register_distributor`, `approve_distributor`, `reject_distributor`; distributor documents (storage paths only); rejection reason |
 
 Two fixes were found by testing and the security advisor and applied as separate migrations in the project. They are already included in files 003 and 004 here:
 
@@ -27,6 +28,10 @@ Auto-confirm period (D-006), overdue block period (D-007) and agent fee (D-008) 
 `tests/db_rules.sql` runs the order path, the actor rules, guards, commission, audit, configuration audit and row-level security. It creates test users and orders, and ends by raising an error that carries the results, so every change is rolled back. Run it only on a development project.
 
 Last run: 32 of 32 checks passed.
+
+`tests/phase2_onboarding.sql` covers registration (buyer, agent, distributor), the agent town rule, duplicate phone numbers, terms acceptance, distributor approval and rejection, and who can see distributors and their documents. Last run: 22 of 22 checks passed.
+
+Phase 2 is partly done. Still to do: phone sign-in (needs D-001), the server step that creates the auth user for agent-assisted registration (an edge function), and the approval checklist (needs D-003).
 
 ## Security advisor
 
