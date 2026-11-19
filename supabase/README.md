@@ -14,6 +14,7 @@ Applied in order. Each file is the final state for its area.
 | `migrations/20261119000004_business_functions.sql` | `place_order`, `transition_order`, commission, order codes, restricted-goods guard, config audit |
 | `migrations/20261119000005_phase2_onboarding.sql` | Phase 2: `register_buyer`, `create_agent`, `register_distributor`, `approve_distributor`, `reject_distributor`; distributor documents (storage paths only); rejection reason |
 | `migrations/20261119000006_phase3_catalogue.sql` | Phase 3: `add_product`, `update_product`, `set_product_availability`, `admin_hide_product`, `admin_unhide_product`, `browse_catalogue`; photo limit 300 KB; products writable only through functions |
+| `migrations/20261119000010_phase7_admin.sql` | Phase 7 (admin and reporting): `admin_set_config` (known keys only, range-checked, reason required, audited); category change audit; `admin_set_distributor_block` (admin suspension, reason required, overdue blocks lifted only by payment); `admin_search_audit` (filters, page size capped at 500); `kpi_report` (distributors approved, buyers ordering, orders per week, on-time confirmation, dispute rate, invoices paid on time, each against its target) |
 | `migrations/20261119000009_phase5_sync.sql` | Phase 5 (sync): `sync_action` applies each queued action once with its client id and reports conflicts and rejections (never silent); `sync_log` (users see their own entries); PowerSync publication (sensitive tables left out) |
 | `migrations/20261119000008_phase6_invoices.sql` | Phase 6 (invoices): weekly commission invoices per distributor (Jakarta time), each order invoiced once; mark invoice paid with bank reference; overdue list; overdue block that refuses to run until `overdue_block_days` is decided (D-007); tax number recorded; invoices writable only through functions. Agent payouts and auto-confirm are not in this file. |
 | `migrations/20261119000007_phase4_ordering.sql` | Phase 4: automatic AwaitingPayment after accept; admin payment reversal; decline and cancel reasons; notification queue (trigger on order events); payment instructions; payment proof photos; dispute photos (max 3) |
@@ -46,6 +47,10 @@ Phase 6 is partly done. Still waiting: auto-confirm period (D-006), overdue bloc
 `tests/phase5_sync.sql` covers queued actions applied once, a replay returning the first result with no new event, stale actions reported as conflicts (state unchanged), another user's action rejected, unknown actions reported, the sync log's visibility and write rules, and the PowerSync publication. Last run: 15 of 15 checks passed.
 
 Phase 5 is partly done. The sync rules are in `powersync/sync-rules.yaml` (draft). They need the PowerSync project and dashboard validation. The 30-day history window (FR-31) is not expressed yet.
+
+`tests/phase7_admin.sql` covers configuration (changes audited, reason required, range and key checks), category change audit, the KPI figures against known data, the audit viewer (filters, page size, admin only), and admin block and unblock of a distributor. Last run: 21 of 21 checks passed.
+
+Phase 7 is partly done. Still to do: user suspension (needs the check in each function that acts for a user), agent payouts (wait for D-008), and the reports' weekly and monthly scheduling (a job, not a database change).
 
 The Phase 1 test (`tests/db_rules.sql`) was updated for the automatic AwaitingPayment step. Last run: 31 of 31 checks passed.
 
